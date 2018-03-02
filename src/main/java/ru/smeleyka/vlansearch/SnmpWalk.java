@@ -16,32 +16,15 @@ public class SnmpWalk {
     private static final String SPACE = " ";
     private static final String NET = "10.10.";
     private static final String COMMUNITY = "public";
-    private static final String VLAN_OID = ".1.3.6.1.2.1.17.7.1.4.3.1.1";
-    private static final String NAME_OID = ".1.3.6.1.2.1.1.5.0";
+    public static final String VLAN_OID = ".1.3.6.1.2.1.17.7.1.4.3.1.1";
+    public static final String NAME_OID = ".1.3.6.1.2.1.1.5.0";
     private static final int RETRIES = 1;
     private static final int TIMEOUT = 1500;
     private static final int VERSION = SnmpConstants.version2c;
     private static Vector<Switch> switches;
 
     public static void main(String[] args) {
-        byte[] b  = {(byte)192,(byte)168,27,1};
-        int [] i  = {192,168,27,22};
-        long ip = i[0];
-        ip <<=8;
-        ip|=i[1];
-        ip <<=8;
-        ip|=i[2];
-        ip <<=8;
-        ip|=i[3];
-        System.out.println(1<<1);
-        System.out.println(1<<2);
-        System.out.println(1<<3);
-        System.out.println(1<<4);
-        System.out.println(1<<5);
-
-        System.out.println(ip);
-
-        //parseArgs(args);
+        parseArgs(args);
     }
 
     //Парсим входные аргументы и решаем что делать
@@ -110,7 +93,8 @@ public class SnmpWalk {
         getSwitches(getIpArr());
         for (Switch sw : switches) {
             if (sw.isVlanExists(vlan)) {
-                System.out.println(sw.getIp());
+                System.out.println(sw.getIp() + "   " + sw.getNumIp() + "   " + sw.getName());
+
                 //System.out.println("Vlan "+vlan+" on "+sw);
             }
         }

@@ -5,15 +5,32 @@ import java.util.ArrayList;
 /**
  * Created by smeleyka on 28.12.17.
  */
-public class Switch implements Comparable{
+public class Switch implements Comparable {
     private String name;
     private String ip;
+    private long numIp;
     private ArrayList<Integer> vlans;
 
-    public Switch (String ip){
+    public Switch(String ip) {
         this.name = "name " + ip;
         this.ip = ip;
         this.vlans = new ArrayList<Integer>();
+        this.numIp = aToN(ip);
+    }
+
+    private long aToN(String ip) {
+        String[] arr = ip.split("\\.");
+        int[] iArr = new int[arr.length];
+        for (int i = 0; i < arr.length; i++) {
+            iArr[i] = Integer.parseInt(arr[i]);
+        }
+        long number = iArr[0];
+        for (int i = 1; i < iArr.length; i++) {
+            number <<= 8;
+            number |= iArr[i];
+        }
+
+        return number;
     }
 
     public Switch(String ip, ArrayList<Integer> vlans) {
@@ -29,7 +46,11 @@ public class Switch implements Comparable{
         return name;
     }
 
-    public void addVlan(int vlan){
+    public long getNumIp() {
+        return numIp;
+    }
+
+    public void addVlan(int vlan) {
         this.vlans.add(vlan);
     }
 
@@ -41,27 +62,30 @@ public class Switch implements Comparable{
         return vlans;
     }
 
-    public boolean isVlanExists(int vlan){
+    public boolean isVlanExists(int vlan) {
         return this.vlans.contains(vlan);
     }
 
-    private String strVlans(){
+    private String strVlans() {
+        //"NULL" if no vlan or
+        //"1, 2, 5 , 6" for print all vlans
+
         String s = "NULL";
         StringBuilder sb = new StringBuilder();
-        if (!vlans.isEmpty()){
-            for (Integer i:vlans){
+        if (!vlans.isEmpty()) {
+            for (Integer i : vlans) {
                 sb.append(i);
                 sb.append(" ");
             }
             s = sb.toString();
         }
 
-            return s;
+        return s;
     }
 
     @Override
     public String toString() {
-        return "Switch {" + "ip='" + ip + '\'' + ", vlans= '"+strVlans()+"'}";
+        return "Switch {" + "ip='" + ip + '\'' + ", vlans= '" + strVlans() + "'}";
     }
 
     @Override

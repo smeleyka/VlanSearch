@@ -23,6 +23,7 @@ public class SnmpThread implements Runnable {
     private String ip;
     private String oid;
     private Switch sw;
+    private Map<String, String> snmpAnswer;
 
 
     public SnmpThread(String ip, String community, String oid, int version, int retries, int timeout) {
@@ -39,23 +40,50 @@ public class SnmpThread implements Runnable {
 
     @Override
     public void run() {
-        Map<String, String> snmpAnswer = null; // ifTable, mib-2 interfaces
-        snmpAnswer = doWalk(oid, target);
+        snmpGetVlan(sw);
+        snmpGetName(sw);
+        sortLiveSwitch(sw);
+    }
+
+    private void snmpGetVlan(Switch sw) {
+
+        snmpAnswer = doWalk(SnmpWalk.VLAN_OID, target);
 
         for (Map.Entry<String, String> entry : snmpAnswer.entrySet()) {
-            //System.out.printf("%10s -- %24s     %s",ip, entry.getKey(), entry.getValue());
+            //System.out.printf("%10s -- %24s     %s", ip, entry.getKey(), entry.getValue());
             //System.out.println();
 
             sw.addVlan(stringKeyToInt(entry.getKey()));  //adding vlan to switch object
             //System.out.printf("%10s -- %24s     %s" + "\n", ip, stringKeyToInt(entry.getKey()), entry.getValue());
-
         }
+
+    }
+
+    private void snmpGetName(Switch sw) {
+
+        SimpleSnmpClient client = new SimpleSnmpClient("udp:" + ip + "/161");
+        String sysDescr = null;
+        try {
+            sysDescr = client.getAsString(new OID(SnmpWalk.NAME_OID));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        sw.setName(sysDescr);
+
+    }
+
+    private void sortLiveSwitch(Switch sw) {
+
         if (!sw.getVlans().isEmpty()) {
             SnmpWalk.addSwitch(sw);
+
+            for (SnmpWalk)
         }
     }
 
-    public Map<String, String> doWalk(String tableOid, Target target) {
+
+    private Map<String, String> doWalk(String tableOid, Target target) {
+
         Map<String, String> result = new TreeMap<>();
 
         try {
@@ -68,7 +96,7 @@ public class SnmpThread implements Runnable {
             TreeUtils treeUtils = new TreeUtils(snmp, new DefaultPDUFactory());
             List events = treeUtils.getSubtree(target, new OID(tableOid));
             if (events == null || events.size() == 0) {
-                //System.out.println("Error: Unable to read table...");
+                System.out.println("Error: Unable to read table...");
                 return result;
             }
             TreeEvent event;
@@ -78,7 +106,7 @@ public class SnmpThread implements Runnable {
                     continue;
                 }
                 if (event.isError()) {
-                    //System.out.println(ip + " -- Error: table OID [" + tableOid + "] " + event.getErrorMessage());
+                    System.out.println(ip + " -- Error: table OID [" + tableOid + "] " + event.getErrorMessage());
                     continue;
                 }
                 VariableBinding[] varBindings = event.getVariableBindings();

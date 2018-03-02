@@ -1,30 +1,16 @@
 package ru.smeleyka.vlansearch;
 
-import org.snmp4j.mp.SnmpConstants;
-
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 public class SnmpWalk {
-    private static final String INCORRECT_ARG = "Incorrect Argument:";
-    private static final String OUT_OF_RANGE = "Out of range 1-4096";
-    private static final String NO_ARGUMENTS = "No arguments";
-    private static final String SPACE = " ";
-    private static final String NET = "10.10.";
-    private static final String COMMUNITY = "public";
-    public static final String VLAN_OID = ".1.3.6.1.2.1.17.7.1.4.3.1.1";
-    public static final String NAME_OID = ".1.3.6.1.2.1.1.5.0";
-    private static final int RETRIES = 1;
-    private static final int TIMEOUT = 1500;
-    private static final int VERSION = SnmpConstants.version2c;
-    private static Vector<Switch> switches;
+
+    private static MyVector<Switch> switches;
 
     public static void main(String[] args) {
         parseArgs(args);
+        getSwitches(getIpArr());
+        printVlan(Integer.parseInt(args[0]));
     }
 
     //Парсим входные аргументы и решаем что делать
@@ -32,40 +18,41 @@ public class SnmpWalk {
         int vlan = -1;
         try {
             if (ar.length == 0) {
-                System.out.println(INCORRECT_ARG + SPACE + NO_ARGUMENTS);
+                System.out.println(Resources.INCORRECT_ARG + Resources.SPACE + Resources.NO_ARGUMENTS);
                 return;
             }
 
             vlan = Integer.parseInt(ar[0]);
 
             if (vlan < 1 || vlan > 4094) {
-                System.out.println(INCORRECT_ARG + SPACE + OUT_OF_RANGE);
-                return;
+                System.out.println(Resources.INCORRECT_ARG + Resources.SPACE + Resources.OUT_OF_RANGE);
             }
         } catch (NumberFormatException name) {
-            System.out.println(INCORRECT_ARG + SPACE + name.getMessage());
-            return;
+            System.out.println(Resources.INCORRECT_ARG + Resources.SPACE + name.getMessage());
         }
-        findVlan(vlan);
+
     }
 
     //Получаем массив ip
-    public static ArrayList getIpArr() {
+    private static ArrayList getIpArr() {
         ArrayList<String> ipList = new ArrayList<>();
         for (int i = 0; i < 2; i++) {
             for (int j = 0; j < 254; j++) {
-                ipList.add(NET + i + "." + j);
+                ipList.add(Resources.NET + i + "." + j);
             }
         }
         return ipList;
     }
 
     //Создаем потоки с SNMP запросами и наполняем массив switches
-    public static void getSwitches(List<String> ipList) {
-        switches = new Vector<>();
+    private static void getSwitches(List<String> ipList) {
+        switches = new MyVector<>();
         List<Thread> snmpThreads = new ArrayList<>();   //Массив потоков
         for (String ip : ipList) {                      //пробегаем по массиву ip адресов
-            snmpThreads.add(new Thread(new SnmpThread(ip, COMMUNITY, VLAN_OID, VERSION, RETRIES, TIMEOUT))); //Создаем поток и добавляем его в массив
+            snmpThreads.add(new Thread(new SnmpThread
+                    (ip, Resources.COMMUNITY,
+                    Resources.VLAN_OID, Resources.VERSION,
+                    Resources.RETRIES, Resources.TIMEOUT))); //Создаем поток и добавляем его в массив
         }
         try {
             for (Thread t : snmpThreads) { //пробегаем по массиву потоков и запускаем их
@@ -83,19 +70,16 @@ public class SnmpWalk {
         switches.add(sw);
     }
 
-    public static void printSwitches() {
+    private static void printSwitches() {
         for (Switch s : switches) {
-            System.out.println(s);
+            System.out.printf("%12s%7s",s.getIp(),s.getName());
         }
     }
 
-    public static void findVlan(int vlan) {
-        getSwitches(getIpArr());
-        for (Switch sw : switches) {
-            if (sw.isVlanExists(vlan)) {
-                System.out.println(sw.getIp() + "   " + sw.getNumIp() + "   " + sw.getName());
-
-                //System.out.println("Vlan "+vlan+" on "+sw);
+    private static void printVlan(int vlan) {
+        for (Switch s : switches) {
+            if (s.isVlanExists(vlan)) {
+                System.out.printf("%12s%7s",s.getIp(),s.getName());
             }
         }
     }

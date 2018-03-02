@@ -83,6 +83,14 @@ public class Switch implements Comparable {
         return s;
     }
 
+    public boolean biggerThan(Switch s){
+        return s.getNumIp()<this.numIp;
+    }
+
+    public boolean smallerThan(Switch s){
+        return s.getNumIp()> this.numIp;
+    }
+
     @Override
     public String toString() {
         return "Switch {" + "ip='" + ip + '\'' + ", vlans= '" + strVlans() + "'}";

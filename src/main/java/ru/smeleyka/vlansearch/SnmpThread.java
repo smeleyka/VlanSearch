@@ -47,7 +47,7 @@ public class SnmpThread implements Runnable {
 
     private void snmpGetVlan(Switch sw) {
 
-        snmpAnswer = doWalk(SnmpWalk.VLAN_OID, target);
+        snmpAnswer = doWalk(Resources.VLAN_OID, target);
 
         for (Map.Entry<String, String> entry : snmpAnswer.entrySet()) {
             //System.out.printf("%10s -- %24s     %s", ip, entry.getKey(), entry.getValue());
@@ -64,7 +64,7 @@ public class SnmpThread implements Runnable {
         SimpleSnmpClient client = new SimpleSnmpClient("udp:" + ip + "/161");
         String sysDescr = null;
         try {
-            sysDescr = client.getAsString(new OID(SnmpWalk.NAME_OID));
+            sysDescr = client.getAsString(new OID(Resources.NAME_OID));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -77,10 +77,9 @@ public class SnmpThread implements Runnable {
         if (!sw.getVlans().isEmpty()) {
             SnmpWalk.addSwitch(sw);
 
-            for (SnmpWalk)
+            //for (SnmpWalk)
         }
     }
-
 
     private Map<String, String> doWalk(String tableOid, Target target) {
 
@@ -96,7 +95,7 @@ public class SnmpThread implements Runnable {
             TreeUtils treeUtils = new TreeUtils(snmp, new DefaultPDUFactory());
             List events = treeUtils.getSubtree(target, new OID(tableOid));
             if (events == null || events.size() == 0) {
-                System.out.println("Error: Unable to read table...");
+                //System.out.println("Error: Unable to read table...");
                 return result;
             }
             TreeEvent event;
@@ -106,7 +105,7 @@ public class SnmpThread implements Runnable {
                     continue;
                 }
                 if (event.isError()) {
-                    System.out.println(ip + " -- Error: table OID [" + tableOid + "] " + event.getErrorMessage());
+                    //System.out.println(ip + " -- Error: table OID [" + tableOid + "] " + event.getErrorMessage());
                     continue;
                 }
                 VariableBinding[] varBindings = event.getVariableBindings();

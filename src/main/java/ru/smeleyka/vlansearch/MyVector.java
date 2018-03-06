@@ -22,5 +22,4 @@ public class MyVector<S extends Switch> extends Vector<S> {
         }
         return super.add(aSwitch);
     }
-
 }

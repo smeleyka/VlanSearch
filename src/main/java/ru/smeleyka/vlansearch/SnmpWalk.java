@@ -2,6 +2,7 @@ package ru.smeleyka.vlansearch;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
 public class SnmpWalk {
 
@@ -72,14 +73,14 @@ public class SnmpWalk {
 
     private static void printSwitches() {
         for (Switch s : switches) {
-            System.out.printf("%12s%7s",s.getIp(),s.getName());
+            System.out.printf("%12s%7s\n", s.getIp(), s.getName());
         }
     }
 
     private static void printVlan(int vlan) {
         for (Switch s : switches) {
             if (s.isVlanExists(vlan)) {
-                System.out.printf("%12s%7s",s.getIp(),s.getName());
+                System.out.printf("%12s%20s\n", s.getIp(), s.getName());
             }
         }
     }
